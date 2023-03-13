@@ -25,14 +25,23 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
-                .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers(HttpMethod.POST,"/api").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                )
                 .userDetailsService(customUsrDetailsService)
+                .csrf()
+                .disable()
+                .authorizeHttpRequests()
+
+                //Доступ только для не зарегистрированных пользователей
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api").hasRole("ADMIN")
+                .anyRequest().permitAll()
+                .and()
+                //Настройка для входа в систему
                 .formLogin(withDefaults());
+
         return http.build();
+
     }
 
     @Bean
